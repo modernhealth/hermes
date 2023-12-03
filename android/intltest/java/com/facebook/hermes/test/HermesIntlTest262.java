@@ -4,34 +4,58 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+package com.facebook.hermes.test;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
+import android.app.Instrumentation;
 import android.content.res.AssetManager;
-import android.test.InstrumentationTestCase;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.facebook.hermes.test.JSRuntime;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Function;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.Before;
+import org.junit.runners.Parameterized;
+
 
 // Run "./gradlew :intltest:prepareTests" from the root to copy the test files to the
 // APK assets.
-public class HermesIntlTest262 extends InstrumentationTestCase {
-
+@RunWith(Parameterized.class)
+public final class HermesIntlTest262 {
   private static final String LOG_TAG = "HermesIntlTest";
 
-  protected void evalScriptFromAsset(JSRuntime rt, String filename) throws IOException {
-    AssetManager assets = getInstrumentation().getContext().getAssets();
+  protected static void evalScriptFromAsset(JSRuntime rt, String filename) throws IOException {
+    Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+    AssetManager assets = instrumentation.getContext().getAssets();
     InputStream is = assets.open(filename);
 
     BufferedReader r = new BufferedReader(new InputStreamReader(is));
@@ -45,7 +69,7 @@ public class HermesIntlTest262 extends InstrumentationTestCase {
     rt.evaluateJavaScript(script);
   }
 
-  protected void evaluateCommonScriptsFromAsset(JSRuntime rt) throws IOException {
+  protected static void evaluateCommonScriptsFromAsset(JSRuntime rt) throws IOException {
     evalScriptFromAsset(rt, "test262/harness/sta.js");
     evalScriptFromAsset(rt, "test262/harness/assert.js");
     evalScriptFromAsset(rt, "test262/harness/testIntl.js");
@@ -56,11 +80,49 @@ public class HermesIntlTest262 extends InstrumentationTestCase {
     evalScriptFromAsset(rt, "test262/harness/testTypedArray.js");
   }
 
-  public void test262Intl() throws IOException {
+  @Parameterized.Parameters(name = "{0}")
+  public static Iterable<? extends Object> data() {
+    try {
+      return findAllTestCasesRuntime();
+    } catch (IOException exc) {
+      System.out.println(exc.getMessage());
+      return null;
+    }
+  }
+
+  private final String path;
+
+  public HermesIntlTest262(String path) {
+    this.path = path;
+  }
+
+  @Test
+  public void test262Intl() {
+    try {
+
+      Log.d(LOG_TAG, "Evaluating " + path);
+
+      try (JSRuntime rt = JSRuntime.makeHermesRuntime()) {
+        evaluateCommonScriptsFromAsset(rt);
+
+        try {
+          evalScriptFromAsset(rt, this.path);
+
+        } catch (com.facebook.jni.CppException ex) {
+          Assert.fail(ex.getMessage());
+        }
+      }
+    } catch (IOException exc) {
+      Assert.fail(exc.getMessage());
+    }
+  }
+
+  public static List<String> findAllTestCasesRuntime() throws IOException {
+    List<String> paths = new ArrayList<>();
     Set<String> skipList = getSkipList();
     Stack<String> testFiles = new Stack<>();
     testFiles.push("test262/test");
-    AssetManager assets = getInstrumentation().getContext().getAssets();
+    AssetManager assets = InstrumentationRegistry.getInstrumentation().getContext().getAssets();
     ArrayList<String> ranTests = new ArrayList<>();
     HashMap<String, String> failedTests = new HashMap<>();
 
@@ -76,29 +138,14 @@ public class HermesIntlTest262 extends InstrumentationTestCase {
         Log.v(LOG_TAG, "Found subdirectory " + path);
         continue;
       }
-      Log.d(LOG_TAG, "Evaluating " + path);
 
-      try (JSRuntime rt = JSRuntime.makeHermesRuntime()) {
-        evaluateCommonScriptsFromAsset(rt);
-        try {
-          evalScriptFromAsset(rt, path);
-          ranTests.add(path);
-        } catch (com.facebook.jni.CppException ex) {
-          failedTests.put(path, ex.getMessage());
-        }
-      }
+      paths.add(path);
     }
 
-    Log.v(LOG_TAG, "Passed Tests: " + TextUtils.join("\n", ranTests));
-
-    for (Map.Entry<String, String> entry : failedTests.entrySet()) {
-      Log.v(LOG_TAG, "Failed Tests: " + entry.getKey() + " : " + entry.getValue());
-    }
-
-    assertThat(failedTests.entrySet().isEmpty()).isEqualTo(true);
+    return paths;
   }
 
-  private Set<String> getSkipList() {
+  private static Set<String> getSkipList() {
     Set<String> skipList = new HashSet<>();
 
     // Intl.getCanonicalLocales
@@ -176,12 +223,24 @@ public class HermesIntlTest262 extends InstrumentationTestCase {
             "test262/test/intl402/DateTimeFormat/prototype/format/dayPeriod-short-en.js",
             "test262/test/intl402/DateTimeFormat/prototype/format/dayPeriod-long-en.js",
             "test262/test/intl402/DateTimeFormat/prototype/format/fractionalSecondDigits.js",
+            "test262/test/intl402/DateTimeFormat/prototype/format/temporal-zoneddatetime-not-supported.js",
             "test262/test/intl402/DateTimeFormat/prototype/formatToParts/fractionalSecondDigits.js",
             "test262/test/intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-narrow-en.js",
             "test262/test/intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-long-en.js",
             "test262/test/intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-short-en.js",
             "test262/test/intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-resolved-time-zone.js",
             "test262/test/intl402/DateTimeFormat/prototype/format/temporal-objects-resolved-time-zone.js",
+            "test262/test/intl402/DateTimeFormat/prototype/formatRange/fractionalSecondDigits.js",
+            "test262/test/Intl/intl402/DateTimeFormat/prototype/formatRange/fails-on-distinct-temporal-types.js",
+            "test262/test/intl402/DateTimeFormat/prototype/formatRange/temporal-zoneddatetime-not-supported.js",
+            "test262/test/intl402/DateTimeFormat/prototype/formatRange/temporal-zoneddatetime-not-supported.js",
+            "test262/test/intl402/DateTimeFormat/prototype/formatRange/temporal-objects-resolved-time-zone.js",
+            "test262/test/intl402/DateTimeFormat/prototype/formatToParts/temporal-zoneddatetime-not-supported.js",
+            "test262/test/intl402/DateTimeFormat/prototype/formatRangeToParts/fractionalSecondDigits.js",
+            "test262/test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-resolved-time-zone.js",
+            "test262/test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-zoneddatetime-not-supported.js",
+            "test262/test/Intl/intl402/DateTimeFormat/prototype/formatRangeToParts/fails-on-distinct-temporal-types.js",
+            // "test262/test/intl402/DateTimeFormat/prototype/formatRangeToParts/date-same-returns-single-date.js",
             "test262/test/intl402/DateTimeFormat/subclassing.js",
             "test262/test/intl402/DateTimeFormat/proto-from-ctor-realm.js",
             // TODO: Investigate why this fails.
@@ -192,8 +251,8 @@ public class HermesIntlTest262 extends InstrumentationTestCase {
             "test262/test/intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-dateStyle.js",
             "test262/test/intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-timeStyle.js",
             "test262/test/intl402/DateTimeFormat/prototype/resolvedOptions/order-dayPeriod.js",
-            "test262/test/intl402/DateTimeFormat/prototype/formatRange",
-            "test262/test/intl402/DateTimeFormat/prototype/formatRangeToParts"));
+            // Requires Intl.supportedValuesOf
+            "test262/test/intl402/DateTimeFormat/timezone-case-insensitive.js"));
 
     // Intl.NumberFormat
     skipList.addAll(
@@ -293,7 +352,62 @@ public class HermesIntlTest262 extends InstrumentationTestCase {
             "test262/test/intl402/NumberFormat/prototype/formatToParts/unit-zh-TW.js",
             "test262/test/intl402/NumberFormat/prototype/formatToParts/percent-en-US.js",
             "test262/test/intl402/NumberFormat/prototype/formatToParts/engineering-scientific-zh-TW.js",
-            "test262/test/intl402/NumberFormat/prototype/formatToParts/notation-compact-zh-TW.js"));
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/notation-compact-zh-TW.js",
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/signDisplay-negative-ja-JP.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-50.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-25.js",
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/signDisplay-negative-currency-en-US.js",
+            "test262/test/intl402/NumberFormat/test-option-roundingPriority-mixed-options.js",
+            "test262/test/intl402/NumberFormat/prototype/resolvedOptions/return-keys-order-default.js",
+            "test262/test/intl402/NumberFormat/prototype/format/signDisplay-negative-de-DE.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRangeToParts/name.js",
+            "test262/test/intl402/NumberFormat/prototype/format/signDisplay-negative-en-US.js",
+            "test262/test/intl402/NumberFormat/test-option-roundingPriority.js",
+            "test262/test/intl402/NumberFormat/prototype/format/signDisplay-negative-currency-de-DE.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRangeToParts/invoked-as-func.js",
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/signDisplay-negative-currency-ko-KR.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRange/invoked-as-func.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-2000.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-5.js",
+            "test262/test/intl402/NumberFormat/constructor-options-throwing-getters-trailing-zero-display.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRange/builtin.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRangeToParts/prop-desc.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRange/pt-PT.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-2.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRange/nan-arguments-throws.js",
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/signDisplay-negative-zh-TW.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-250.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRangeToParts/length.js",
+            "test262/test/intl402/NumberFormat/prototype/format/useGrouping-extended-de-DE.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-5000.js",
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/signDisplay-negative-currency-de-DE.js",
+            "test262/test/intl402/NumberFormat/throws-for-maximumFractionDigits-over-limit.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRange/length.js",
+            "test262/test/intl402/NumberFormat/prototype/format/numbering-systems.js",
+            "test262/test/intl402/NumberFormat/constructor-roundingIncrement.js",
+            "test262/test/intl402/NumberFormat/constructor-options-throwing-getters-rounding-increment.js",
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/signDisplay-negative-ko-KR.js",
+            "test262/test/intl402/NumberFormat/prototype/format/signDisplay-negative-currency-ko-KR.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-2500.js",
+            "test262/test/intl402/NumberFormat/constructor-signDisplay-negative.js",
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/signDisplay-negative-currency-ja-JP.js",
+            "test262/test/intl402/NumberFormat/constructor-options-throwing-getters-rounding-priority.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-500.js",
+            "test262/test/intl402/NumberFormat/prototype/format/signDisplay-negative-currency-zh-TW.js",
+            "test262/test/intl402/NumberFormat/prototype/formatToParts/signDisplay-negative-de-DE.js",
+            "test262/test/intl402/NumberFormat/prototype/format/value-decimal-string.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRangeToParts/nan-arguments-throws.js",
+            "test262/test/intl402/NumberFormat/throws-for-minimumFractionDigits-over-limit.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRangeToParts/en-US.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRange/x-greater-than-y-not-throws.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-increment-200.js",
+            "test262/test/intl402/NumberFormat/prototype/format/signDisplay-negative-ja-JP.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRangeToParts/x-greater-than-y-not-throws.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRange/name.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRange/en-US.js",
+            "test262/test/intl402/NumberFormat/prototype/format/format-rounding-priority-more-precision.js",
+            "test262/test/intl402/NumberFormat/prototype/formatRangeToParts/builtin.js"
+        ));
 
     // Misc
     skipList.addAll(
