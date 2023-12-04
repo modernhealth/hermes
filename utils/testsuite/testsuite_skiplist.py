@@ -1121,6 +1121,8 @@ SKIP_LIST = [
     "test262/test/intl402/DateTimeFormat/prototype/resolvedOptions/order-dayPeriod.js",
     "test262/test/intl402/DateTimeFormat/prototype/resolvedOptions/order-style.js",
     "test262/test/intl402/DateTimeFormat/prototype/formatToParts",
+    "test262/test/intl402/DateTimeFormat/prototype/formatRange/en-US.js",
+    "test262/test/intl402/DateTimeFormat/prototype/formatRangeToParts",
     "test262/test/intl402/DateTimeFormat/prototype/format/proleptic-gregorian-calendar.js",
     # Moved to test/hermes/intl/date-time-format-time-style.js with modifications
     "test262/test/intl402/DateTimeFormat/prototype/format/timedatestyle-en.js",
@@ -2076,7 +2078,6 @@ UNSUPPORTED_FEATURES = [
     "Intl.Locale",
     "Intl.NumberFormat-v3",
     "Intl.DurationFormat",
-    "Intl.DateTimeFormat-formatRange",
     "Intl.DateTimeFormat-fractionalSecondDigits",
     "Intl.DateTimeFormat-dayPeriod",
     "Intl-enumeration",
