@@ -15,7 +15,6 @@
 #include <shared_mutex>
 #include <thread>
 #include <unordered_set>
-
 static_assert(__has_feature(objc_arc), "arc must be enabled");
 
 // Enable u"literal"s strings
@@ -1742,32 +1741,41 @@ static constexpr bool isSorted(const std::u16string_view (&v)[N]) {
 }
 
 // https://402.ecma-international.org/8.0/#sec-issanctionedsimpleunitidentifier
-bool isSanctionedSimpleUnitIdentifier(std::u16string_view unitIdentifier) {
+static const std::vector<std::u16string_view>
+getSanctionedSimpleUnitIdentifiers() {
   static constexpr std::u16string_view sanctionedIdentifiers[] = {
-      u"acre",       u"bit",        u"byte",
-      u"celsius",    u"centimeter", u"day",
-      u"degree",     u"fahrenheit", u"fluid-ounce",
-      u"foot",       u"gallon",     u"gigabit",
-      u"gigabyte",   u"gram",       u"hectare",
-      u"hour",       u"inch",       u"kilobit",
-      u"kilobyte",   u"kilogram",   u"kilometer",
-      u"liter",      u"megabit",    u"megabyte",
-      u"meter",      u"mile",       u"mile-scandinavian",
-      u"milliliter", u"millimeter", u"millisecond",
-      u"minute",     u"month",      u"ounce",
-      u"percent",    u"petabyte",   u"pound",
-      u"second",     u"stone",      u"terabit",
-      u"terabyte",   u"week",       u"yard",
+      u"acre",        u"bit",         u"byte",        u"celsius",
+      u"centimeter",  u"day",         u"degree",      u"fahrenheit",
+      u"fluid-ounce", u"foot",        u"gallon",      u"gigabit",
+      u"gigabyte",    u"gram",        u"hectare",     u"hour",
+      u"inch",        u"kilobit",     u"kilobyte",    u"kilogram",
+      u"kilometer",   u"liter",       u"megabit",     u"megabyte",
+      u"meter",       u"microsecond", u"mile",        u"mile-scandinavian",
+      u"milliliter",  u"millimeter",  u"millisecond", u"minute",
+      u"month",       u"nanosecond",  u"ounce",       u"percent",
+      u"petabyte",    u"pound",       u"second",      u"stone",
+      u"terabit",     u"terabyte",    u"week",        u"yard",
       u"year"};
 
   static_assert(
       isSorted(sanctionedIdentifiers), "keep sanctionedIdentifiers sorted");
+
+  static std::vector<std::u16string_view> sanctionedIdentifiersVector(
+      std::begin(sanctionedIdentifiers), std::end(sanctionedIdentifiers));
+
+  return sanctionedIdentifiersVector;
+}
+
+// https://402.ecma-international.org/8.0/#sec-issanctionedsimpleunitidentifier
+bool isSanctionedSimpleUnitIdentifier(std::u16string_view unitIdentifier) {
+  auto sanctionedIdentifiers = getSanctionedSimpleUnitIdentifiers();
+
   //  1. If unitIdentifier is listed in Table 2 (sanctionedIdentifiers) above,
   //  return true
   //  2. Else, return false.
   return std::binary_search(
-      std::begin(sanctionedIdentifiers),
-      std::end(sanctionedIdentifiers),
+      sanctionedIdentifiers.begin(),
+      sanctionedIdentifiers.end(),
       unitIdentifier);
 }
 
@@ -1808,7 +1816,8 @@ bool isWellFormedUnitIdentifier(std::u16string_view unitIdentifier) {
 NSUnit *unitIdentifierToNSUnit(const std::u16string &unitId) {
   static const std::pair<std::u16string_view, NSUnit *> units[] = {
     {u"acre", NSUnitArea.acres},
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_11_2
     {u"bit", NSUnitInformationStorage.bits},
     {u"byte", NSUnitInformationStorage.bytes},
 #endif
@@ -1819,7 +1828,8 @@ NSUnit *unitIdentifierToNSUnit(const std::u16string &unitId) {
     {u"fluid-ounce", NSUnitVolume.fluidOunces},
     {u"foot", NSUnitLength.feet},
     {u"gallon", NSUnitVolume.gallons},
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_11_2
     {u"gigabit", NSUnitInformationStorage.gigabits},
     {u"gigabyte", NSUnitInformationStorage.gigabytes},
 #endif
@@ -1828,7 +1838,8 @@ NSUnit *unitIdentifierToNSUnit(const std::u16string &unitId) {
     {u"hectare", NSUnitArea.hectares},
     {u"hour", NSUnitDuration.hours},
     {u"inch", NSUnitLength.inches},
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_11_2
     {u"kilobit", NSUnitInformationStorage.kilobits},
     {u"kilobyte", NSUnitInformationStorage.kilobytes},
 #endif
@@ -1836,30 +1847,42 @@ NSUnit *unitIdentifierToNSUnit(const std::u16string &unitId) {
     {u"kilometer", NSUnitLength.kilometers},
     {u"kilometer-per-hour", NSUnitSpeed.kilometersPerHour},
     {u"liter", NSUnitVolume.liters},
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_11_2
     {u"megabit", NSUnitInformationStorage.megabits},
     {u"megabyte", NSUnitInformationStorage.megabytes},
 #endif
     {u"meter", NSUnitLength.meters},
     {u"meter-per-second", NSUnitSpeed.metersPerSecond},
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_10_15
+    {u"microsecond", NSUnitDuration.microseconds},
+#endif
     {u"mile", NSUnitLength.miles},
     {u"mile-per-gallon", NSUnitFuelEfficiency.milesPerGallon},
     {u"mile-per-hour", NSUnitSpeed.milesPerHour},
     {u"mile-scandinavian", NSUnitLength.scandinavianMiles},
     {u"milliliter", NSUnitVolume.milliliters},
     {u"millimeter", NSUnitLength.millimeters},
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_10_15
     {u"millisecond", NSUnitDuration.milliseconds},
 #endif
     {u"minute", NSUnitDuration.minutes},
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_10_15
+    {u"nanosecond", NSUnitDuration.nanoseconds},
+#endif
     {u"ounce", NSUnitMass.ounces},
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_10_15
     {u"petabyte", NSUnitInformationStorage.petabytes},
 #endif
     {u"pound", NSUnitMass.poundsMass},
     {u"second", NSUnitDuration.seconds},
     {u"stone", NSUnitMass.stones},
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0 || \
+    __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_OS_X_10_15
     {u"terabit", NSUnitInformationStorage.terabits},
     {u"terabyte", NSUnitInformationStorage.terabytes},
 #endif
@@ -2059,6 +2082,7 @@ vm::ExecutionStatus CollatorApple::initialize(
           vm::TwineChar16("Invalid collation: ") +
           vm::TwineChar16(collationOpt->c_str()));
     }
+
     // 12. Set opt.[[co]] to collation.
     opt.emplace(u"co", std::move(*collationOpt));
   }
@@ -2102,14 +2126,16 @@ vm::ExecutionStatus CollatorApple::initialize(
   collation_ = *collation;
   // 24. If relevantExtensionKeys contains "kn", then
   // a. Set collator.[[Numeric]] to ! SameValue(r.[[kn]], "true").
-  numeric_ = r.extensions.at(u"kn") == u"true";
+  auto kn = r.extensions.at(u"kn");
+  numeric_ = kn && (*kn == u"true");
 
   // 25. If relevantExtensionKeys contains "kf", then
   // a. Set collator.[[CaseFirst]] to r.[[kf]].
-  auto caseFirst = r.extensions.at(u"kf");
-  if (caseFirst) {
-    caseFirst_ = *caseFirst;
-  }
+  auto kf = r.extensions.at(u"kf");
+  if (!kf)
+    kf = u"false";
+  caseFirst_ = *kf;
+
   // 26. Let sensitivity be ? GetOption(options, "sensitivity", "string", «
   // "base", "accent", "case", "variant" », undefined).
   static constexpr std::u16string_view sensitivityOpts[] = {
@@ -3325,8 +3351,7 @@ vm::ExecutionStatus NumberFormatApple::setNumberFormatDigitOptions(
   auto mnsdIt = options.find(u"minimumSignificantDigits");
   // 5. Let mxsd be ? Get(options, "maximumSignificantDigits").
   auto mxsdIt = options.find(u"maximumSignificantDigits");
-  // 6. Set intlObj.[[MinimumIntegerDigits]] to mnid.
-  // TODO: Update the remaining initialization for ECMA-402 10
+  // 10. Set intlObj.[[MinimumIntegerDigits]] to mnid.
   minimumIntegerDigits_ = *mnidOpt;
   // 11. If mnsd is not undefined or mxsd is not undefined, then
   if (mnsdIt != options.end() || mxsdIt != options.end()) {
