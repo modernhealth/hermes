@@ -496,6 +496,7 @@ STR(formatRangeToParts, "formatRangeToParts")
 STR(getCanonicalLocales, "getCanonicalLocales")
 STR(resolvedOptions, "resolvedOptions")
 STR(supportedLocalesOf, "supportedLocalesOf")
+STR(supportedValuesOf, "supportedValuesOf")
 #endif
 
 // Define strings like "[object Number]" for all classes.

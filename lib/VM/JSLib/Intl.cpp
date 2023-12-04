@@ -76,6 +76,35 @@ CallResult<HermesValue> stringArrayToJS(
   return array.getHermesValue();
 }
 
+CallResult<HermesValue> stringViewArrayToJS(
+    Runtime &runtime,
+    CallResult<std::vector<std::u16string_view>> result) {
+  if (LLVM_UNLIKELY(result == ExecutionStatus::EXCEPTION)) {
+    return ExecutionStatus::EXCEPTION;
+  }
+
+  CallResult<Handle<JSArray>> arrayRes =
+      JSArray::create(runtime, result->size(), result->size());
+  if (LLVM_UNLIKELY(arrayRes == ExecutionStatus::EXCEPTION)) {
+    return ExecutionStatus::EXCEPTION;
+  }
+  Handle<JSArray> array = *arrayRes;
+  MutableHandle<> name{runtime};
+  uint64_t index = 0;
+  GCScopeMarkerRAII marker{runtime};
+  for (auto str : *result) {
+    marker.flush();
+    CallResult<HermesValue> nameRes =
+        StringPrimitive::createEfficient(runtime, std::u16string{str});
+    if (LLVM_UNLIKELY(nameRes == ExecutionStatus::EXCEPTION)) {
+      return ExecutionStatus::EXCEPTION;
+    }
+    name = *nameRes;
+    JSArray::setElementAt(array, runtime, index++, name);
+  }
+  return array.getHermesValue();
+}
+
 CallResult<HermesValue> optionsToJS(
     Runtime &runtime,
     platform_intl::Options result) {
@@ -1837,6 +1866,28 @@ intlGetCanonicalLocales(void *, vm::Runtime &runtime, vm::NativeArgs args) {
       runtime, platform_intl::getCanonicalLocales(runtime, *localesRes));
 }
 
+vm::CallResult<vm::HermesValue>
+intlSupportedValuesOf(void *, vm::Runtime &runtime, vm::NativeArgs args) {
+    vm::CallResult<std::u16string> keyRes =
+    vm::stringFromJS(runtime, args.getArgHandle(0));
+
+    if (LLVM_UNLIKELY(keyRes == vm::ExecutionStatus::EXCEPTION)) {
+      return vm::ExecutionStatus::EXCEPTION;
+    }
+
+    std::u16string key = keyRes.getValue();
+
+    auto valuesOfRes = platform_intl::supportedValuesOf(runtime, key);
+    if (LLVM_UNLIKELY(valuesOfRes == vm::ExecutionStatus::EXCEPTION)) {
+      return vm::ExecutionStatus::EXCEPTION;
+    }
+
+    auto valuesOf = valuesOfRes.getValue();
+
+  return vm::stringViewArrayToJS(
+      runtime, valuesOf);
+}
+
 } // namespace
 
 vm::Handle<vm::JSObject> createIntlObject(vm::Runtime &runtime) {
@@ -1848,6 +1899,14 @@ vm::Handle<vm::JSObject> createIntlObject(vm::Runtime &runtime) {
       vm::Predefined::getSymbolID(vm::Predefined::getCanonicalLocales),
       nullptr,
       intlGetCanonicalLocales,
+      1);
+
+  defineMethod(
+      runtime,
+      intl,
+      vm::Predefined::getSymbolID(vm::Predefined::supportedValuesOf),
+      nullptr,
+      intlSupportedValuesOf,
       1);
 
   {

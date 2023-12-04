@@ -1126,8 +1126,6 @@ SKIP_LIST = [
     "test262/test/intl402/DateTimeFormat/prototype/format/timedatestyle-en.js",
     # We don't create records which are safe from "tainting" yet
     "test262/test/intl402/DateTimeFormat/taint-Object-prototype-date-time-components.js",
-    # Requires Intl.supportedValuesOf(...)
-    "test262/test/intl402/DateTimeFormat/timezone-case-insensitive.js",
     "test262/test/intl402/NumberFormat/subclassing.js",
     "test262/test/intl402/NumberFormat/constructor-locales-hasproperty.js",
     "test262/test/intl402/NumberFormat/prototype/resolvedOptions/order.js",
@@ -2078,7 +2076,6 @@ UNSUPPORTED_FEATURES = [
     "Intl.DurationFormat",
     "Intl.DateTimeFormat-fractionalSecondDigits",
     "Intl.DateTimeFormat-dayPeriod",
-    "Intl-enumeration",
 ]
 
 PERMANENT_UNSUPPORTED_FEATURES = [

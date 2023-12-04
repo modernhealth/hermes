@@ -40,6 +40,16 @@ std::u16string nsStringToU16String(NSString *src) {
   [src getCharacters:(unichar *)&result[0] range:NSMakeRange(0, size)];
   return result;
 }
+template <typename K, typename T>
+const std::vector<T> nsArrayToVector(
+    NSArray<K *> *array,
+    std::function<T(K *)> element_converter) {
+  std::vector<T> elements;
+  for (K *element in array) {
+    elements.push_back(element_converter(element));
+  }
+  return elements;
+}
 const std::vector<std::u16string> &getAvailableLocales() {
   static const std::vector<std::u16string> *availableLocales = [] {
     NSArray<NSString *> *availableLocales =
@@ -3969,6 +3979,35 @@ std::u16string NumberFormat::format(double number) noexcept {
 
 std::vector<Part> NumberFormat::formatToParts(double number) noexcept {
   llvm_unreachable("formatToParts is unimplemented on Apple platforms");
+}
+
+const vm::CallResult<std::vector<std::u16string_view>> supportedValuesOf(
+    vm::Runtime &runtime,
+    std::u16string key) noexcept {
+  static std::vector<std::u16string> currency =
+      nsArrayToVector<NSString, std::u16string>(
+          [NSLocale ISOCurrencyCodes], nsStringToU16String);
+  static std::vector<std::u16string_view> currencyView(
+      currency.begin(), currency.end());
+
+  static std::u16string_view collation = u"standard";
+  static std::vector<std::u16string_view> collationView{collation};
+
+  if (key == u"calendar") {
+    return getSupportedCalendarIdentifiers();
+  } else if (key == u"collation") {
+    return collationView;
+  } else if (key == u"currency") {
+    return currencyView;
+  } else if (key == u"numberingSystem") {
+    return getSupportedNumberingSystems();
+  } else if (key == u"timeZone") {
+    return validTimeZoneNames().availableCanonicalTimeZones();
+  } else if (key == u"unit") {
+    return getSanctionedSimpleUnitIdentifiers();
+  }
+
+  return runtime.raiseRangeError(u"Invalid key");
 }
 
 } // namespace platform_intl

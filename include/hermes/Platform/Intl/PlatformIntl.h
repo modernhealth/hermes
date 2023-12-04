@@ -23,6 +23,8 @@
 namespace hermes {
 namespace platform_intl {
 
+const vm::CallResult<std::vector<std::u16string_view>> supportedValuesOf(vm::Runtime &runtime,std::u16string key) noexcept;
+
 class Option {
  public:
   enum Kind { Bool, Number, String };
