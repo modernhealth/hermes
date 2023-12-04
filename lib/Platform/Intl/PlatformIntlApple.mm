@@ -2667,10 +2667,13 @@ void DateTimeFormatApple::initializeNSDateFormatter() noexcept {
     switch (*fractionalSecondDigits_) {
       case 1:
         [customFormattedDate appendString:@"S"];
+        break;
       case 2:
         [customFormattedDate appendString:@"SS"];
+        break;
       case 3:
         [customFormattedDate appendString:@"SSS"];
+        break;
     }
   }
   // Not supported - dayPeriod (at night/in the morning)
