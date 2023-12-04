@@ -244,9 +244,22 @@ static std::optional<std::u16string_view> fromNSCalendarIdentifier(
 
 // Only support "latn" for now.
 static constexpr std::u16string_view supportedNumberingSystems[] = {
-    u"latn",
-};
+    u"adlm",     u"ahom",     u"arab",     u"arabext",  u"bali",
+    u"beng",     u"bhks",     u"brah",     u"cakm",     u"cham",
+    u"deva",     u"diak",     u"fullwide", u"gong",     u"gonm",
+    u"gujr",     u"guru",     u"hanidec",  u"hmng",     u"hmnp",
+    u"java",     u"kali",     u"kawi",     u"khmr",     u"knda",
+    u"lana",     u"lanatham", u"laoo",     u"latn",     u"lepc",
+    u"limb",     u"mathbold", u"mathdbl",  u"mathmono", u"mathsanb",
+    u"mathsans", u"mlym",     u"modi",     u"mong",     u"mroo",
+    u"mtei",     u"mymr",     u"mymrshan", u"mymrtlng", u"nagm",
+    u"newa",     u"nkoo",     u"olck",     u"orya",     u"osma",
+    u"rohg",     u"saur",     u"segment",  u"shrd",     u"sind",
+    u"sinh",     u"sora",     u"sund",     u"takr",     u"talu",
+    u"tamldec",  u"telu",     u"thai",     u"tibt",     u"tirh",
+    u"tnsa",     u"vaii",     u"wara",     u"wcho"};
 
+namespace detail {
 static std::vector<std::u16string_view> getSupportedNumberingSystems() {
   std::vector<std::u16string_view> supportedNumberingSystemsView;
 
@@ -258,6 +271,319 @@ static std::vector<std::u16string_view> getSupportedNumberingSystems() {
 
   return supportedNumberingSystemsView;
 }
+} // namespace detail
+
+static std::vector<std::u16string_view> getSupportedNumberingSystems() {
+  static std::vector<std::u16string_view> supportedNumberingSystemsView =
+      detail::getSupportedNumberingSystems();
+
+  return supportedNumberingSystemsView;
+}
+
+static std::array<std::u16string, 10> getSimpleNumeralTransliteration(
+    std::u16string_view ns) {
+  static std::unordered_map<std::u16string_view, std::array<std::u16string, 10>>
+      simpleNumeralTransliterations{
+          {u"adlm",
+           std::array<std::u16string, 10>(
+               {u"𞥐", u"𞥑", u"𞥒", u"𞥓", u"𞥔", u"𞥕", u"𞥖", u"𞥗", u"𞥘", u"𞥙"})},
+          {u"ahom",
+           std::array<std::u16string, 10>(
+               {u"𑜰", u"𑜱", u"𑜲", u"𑜳", u"𑜴", u"𑜵", u"𑜶", u"𑜷", u"𑜸", u"𑜹"})},
+          {u"arab",
+           std::array<std::u16string, 10>(
+               {u"٠", u"١", u"٢", u"٣", u"٤", u"٥", u"٦", u"٧", u"٨", u"٩"})},
+          {u"arabext",
+           std::array<std::u16string, 10>(
+               {u"۰", u"۱", u"۲", u"۳", u"۴", u"۵", u"۶", u"۷", u"۸", u"۹"})},
+          {u"bali",
+           std::array<std::u16string, 10>(
+               {u"\u1B50",
+                u"\u1B51",
+                u"\u1B52",
+                u"\u1B53",
+                u"\u1B54",
+                u"\u1B55",
+                u"\u1B56",
+                u"\u1B57",
+                u"\u1B58",
+                u"\u1B59"})},
+          {u"beng",
+           std::array<std::u16string, 10>(
+               {u"০", u"১", u"২", u"৩", u"৪", u"৫", u"৬", u"৭", u"৮", u"৯"})},
+          {u"bhks",
+           std::array<std::u16string, 10>(
+               {u"𑱐", u"𑱑", u"𑱒", u"𑱓", u"𑱔", u"𑱕", u"𑱖", u"𑱗", u"𑱘", u"𑱙"})},
+          {u"brah",
+           std::array<std::u16string, 10>(
+               {u"𑁦", u"𑁧", u"𑁨", u"𑁩", u"𑁪", u"𑁫", u"𑁬", u"𑁭", u"𑁮", u"𑁯"})},
+          {u"cakm",
+           std::array<std::u16string, 10>(
+               {u"𑄶", u"𑄷", u"𑄸", u"𑄹", u"𑄺", u"𑄻", u"𑄼", u"𑄽", u"𑄾", u"𑄿"})},
+          {u"cham",
+           std::array<std::u16string, 10>(
+               {u"꩐", u"꩑", u"꩒", u"꩓", u"꩔", u"꩕", u"꩖", u"꩗", u"꩘", u"꩙"})},
+          {u"deva",
+           std::array<std::u16string, 10>(
+               {u"०", u"१", u"२", u"३", u"४", u"५", u"६", u"७", u"८", u"९"})},
+          {u"diak",
+           std::array<std::u16string, 10>(
+               {u"𑥐", u"𑥑", u"𑥒", u"𑥓", u"𑥔", u"𑥕", u"𑥖", u"𑥗", u"𑥘", u"𑥙"})},
+          {u"fullwide",
+           std::array<std::u16string, 10>(
+               {u"０",
+                u"１",
+                u"２",
+                u"３",
+                u"４",
+                u"５",
+                u"６",
+                u"７",
+                u"８",
+                u"９"})},
+          {u"gong",
+           std::array<std::u16string, 10>(
+               {u"𑶠", u"𑶡", u"𑶢", u"𑶣", u"𑶤", u"𑶥", u"𑶦", u"𑶧", u"𑶨", u"𑶩"})},
+          {u"gonm",
+           std::array<std::u16string, 10>(
+               {u"𑵐", u"𑵑", u"𑵒", u"𑵓", u"𑵔", u"𑵕", u"𑵖", u"𑵗", u"𑵘", u"𑵙"})},
+          {u"gujr",
+           std::array<std::u16string, 10>(
+               {u"૦", u"૧", u"૨", u"૩", u"૪", u"૫", u"૬", u"૭", u"૮", u"૯"})},
+          {u"guru",
+           std::array<std::u16string, 10>(
+               {u"੦", u"੧", u"੨", u"੩", u"੪", u"੫", u"੬", u"੭", u"੮", u"੯"})},
+          {u"hanidec",
+           std::array<std::u16string, 10>(
+               {u"〇",
+                u"一",
+                u"二",
+                u"三",
+                u"四",
+                u"五",
+                u"六",
+                u"七",
+                u"八",
+                u"九"})},
+          {u"hmng",
+           std::array<std::u16string, 10>(
+               {u"𖭐", u"𖭑", u"𖭒", u"𖭓", u"𖭔", u"𖭕", u"𖭖", u"𖭗", u"𖭘", u"𖭙"})},
+          {u"hmnp",
+           std::array<std::u16string, 10>(
+               {u"𞅀", u"𞅁", u"𞅂", u"𞅃", u"𞅄", u"𞅅", u"𞅆", u"𞅇", u"𞅈", u"𞅉"})},
+          {u"java",
+           std::array<std::u16string, 10>(
+               {u"꧐", u"꧑", u"꧒", u"꧓", u"꧔", u"꧕", u"꧖", u"꧗", u"꧘", u"꧙"})},
+          {u"kali",
+           std::array<std::u16string, 10>(
+               {u"꤀", u"꤁", u"꤂", u"꤃", u"꤄", u"꤅", u"꤆", u"꤇", u"꤈", u"꤉"})},
+          {u"kawi",
+           std::array<std::u16string, 10>(
+               {u"\U00011F50",
+                u"\U00011F51",
+                u"\U00011F52",
+                u"\U00011F53",
+                u"\U00011F54",
+                u"\U00011F55",
+                u"\U00011F56",
+                u"\U00011F57",
+                u"\U00011F58",
+                u"\U00011F59"})},
+          {u"khmr",
+           std::array<std::u16string, 10>(
+               {u"០", u"១", u"២", u"៣", u"៤", u"៥", u"៦", u"៧", u"៨", u"៩"})},
+          {u"knda",
+           std::array<std::u16string, 10>(
+               {u"೦", u"೧", u"೨", u"೩", u"೪", u"೫", u"೬", u"೭", u"೮", u"೯"})},
+          {u"lana",
+           std::array<std::u16string, 10>(
+               {u"᪀", u"᪁", u"᪂", u"᪃", u"᪄", u"᪅", u"᪆", u"᪇", u"᪈", u"᪉"})},
+          {u"lanatham",
+           std::array<std::u16string, 10>(
+               {u"᪐", u"᪑", u"᪒", u"᪓", u"᪔", u"᪕", u"᪖", u"᪗", u"᪘", u"᪙"})},
+          {u"laoo",
+           std::array<std::u16string, 10>(
+               {u"໐", u"໑", u"໒", u"໓", u"໔", u"໕", u"໖", u"໗", u"໘", u"໙"})},
+          {u"latn",
+           std::array<std::u16string, 10>(
+               {u"0", u"1", u"2", u"3", u"4", u"5", u"6", u"7", u"8", u"9"})},
+          {u"lepc",
+           std::array<std::u16string, 10>(
+               {u"᱀", u"᱁", u"᱂", u"᱃", u"᱄", u"᱅", u"᱆", u"᱇", u"᱈", u"᱉"})},
+          {u"limb",
+           std::array<std::u16string, 10>(
+               {u"\u1946",
+                u"\u1947",
+                u"\u1948",
+                u"\u1949",
+                u"\u194A",
+                u"\u194B",
+                u"\u194C",
+                u"\u194D",
+                u"\u194E",
+                u"\u194F"})},
+          {u"nagm",
+           std::array<std::u16string, 10>(
+               {u"\U0001E4F0",
+                u"\U0001E4F1",
+                u"\U0001E4F2",
+                u"\U0001E4F3",
+                u"\U0001E4F4",
+                u"\U0001E4F5",
+                u"\U0001E4F6",
+                u"\U0001E4F7",
+                u"\U0001E4F8",
+                u"\U0001E4F9"})},
+          {u"mathbold",
+           std::array<std::u16string, 10>(
+               {u"𝟎", u"𝟏", u"𝟐", u"𝟑", u"𝟒", u"𝟓", u"𝟔", u"𝟕", u"𝟖", u"𝟗"})},
+          {u"mathdbl",
+           std::array<std::u16string, 10>(
+               {u"𝟘", u"𝟙", u"𝟚", u"𝟛", u"𝟜", u"𝟝", u"𝟞", u"𝟟", u"𝟠", u"𝟡"})},
+          {u"mathmono",
+           std::array<std::u16string, 10>(
+               {u"𝟶", u"𝟷", u"𝟸", u"𝟹", u"𝟺", u"𝟻", u"𝟼", u"𝟽", u"𝟾", u"𝟿"})},
+          {u"mathsanb",
+           std::array<std::u16string, 10>(
+               {u"𝟬", u"𝟭", u"𝟮", u"𝟯", u"𝟰", u"𝟱", u"𝟲", u"𝟳", u"𝟴", u"𝟵"})},
+          {u"mathsans",
+           std::array<std::u16string, 10>(
+               {u"𝟢", u"𝟣", u"𝟤", u"𝟥", u"𝟦", u"𝟧", u"𝟨", u"𝟩", u"𝟪", u"𝟫"})},
+          {u"mlym",
+           std::array<std::u16string, 10>(
+               {u"൦", u"൧", u"൨", u"൩", u"൪", u"൫", u"൬", u"൭", u"൮", u"൯"})},
+          {u"modi",
+           std::array<std::u16string, 10>(
+               {u"𑙐", u"𑙑", u"𑙒", u"𑙓", u"𑙔", u"𑙕", u"𑙖", u"𑙗", u"𑙘", u"𑙙"})},
+          {u"mong",
+           std::array<std::u16string, 10>(
+               {u"᠐", u"᠑", u"᠒", u"᠓", u"᠔", u"᠕", u"᠖", u"᠗", u"᠘", u"᠙"})},
+          {u"mroo",
+           std::array<std::u16string, 10>(
+               {u"𖩠", u"𖩡", u"𖩢", u"𖩣", u"𖩤", u"𖩥", u"𖩦", u"𖩧", u"𖩨", u"𖩩"})},
+          {u"mtei",
+           std::array<std::u16string, 10>(
+               {u"꯰", u"꯱", u"꯲", u"꯳", u"꯴", u"꯵", u"꯶", u"꯷", u"꯸", u"꯹"})},
+          {u"mymr",
+           std::array<std::u16string, 10>(
+               {u"၀", u"၁", u"၂", u"၃", u"၄", u"၅", u"၆", u"၇", u"၈", u"၉"})},
+          {u"mymrshan",
+           std::array<std::u16string, 10>(
+               {u"႐", u"႑", u"႒", u"႓", u"႔", u"႕", u"႖", u"႗", u"႘", u"႙"})},
+          {u"mymrtlng",
+           std::array<std::u16string, 10>(
+               {u"꧰", u"꧱", u"꧲", u"꧳", u"꧴", u"꧵", u"꧶", u"꧷", u"꧸", u"꧹"})},
+          {u"newa",
+           std::array<std::u16string, 10>(
+               {u"𑑐", u"𑑑", u"𑑒", u"𑑓", u"𑑔", u"𑑕", u"𑑖", u"𑑗", u"𑑘", u"𑑙"})},
+          {u"nkoo",
+           std::array<std::u16string, 10>(
+               {u"߀", u"߁", u"߂", u"߃", u"߄", u"߅", u"߆", u"߇", u"߈", u"߉"})},
+          {u"olck",
+           std::array<std::u16string, 10>(
+               {u"᱐", u"᱑", u"᱒", u"᱓", u"᱔", u"᱕", u"᱖", u"᱗", u"᱘", u"᱙"})},
+          {u"orya",
+           std::array<std::u16string, 10>(
+               {u"୦", u"୧", u"୨", u"୩", u"୪", u"୫", u"୬", u"୭", u"୮", u"୯"})},
+          {u"osma",
+           std::array<std::u16string, 10>(
+               {u"𐒠", u"𐒡", u"𐒢", u"𐒣", u"𐒤", u"𐒥", u"𐒦", u"𐒧", u"𐒨", u"𐒩"})},
+          {u"rohg",
+           std::array<std::u16string, 10>(
+               {u"𐴰", u"𐴱", u"𐴲", u"𐴳", u"𐴴", u"𐴵", u"𐴶", u"𐴷", u"𐴸", u"𐴹"})},
+          {u"saur",
+           std::array<std::u16string, 10>(
+               {u"꣐", u"꣑", u"꣒", u"꣓", u"꣔", u"꣕", u"꣖", u"꣗", u"꣘", u"꣙"})},
+          {u"segment",
+           std::array<std::u16string, 10>(
+               {u"🯰", u"🯱", u"🯲", u"🯳", u"🯴", u"🯵", u"🯶", u"🯷", u"🯸", u"🯹"})},
+          {u"shrd",
+           std::array<std::u16string, 10>(
+               {u"𑇐", u"𑇑", u"𑇒", u"𑇓", u"𑇔", u"𑇕", u"𑇖", u"𑇗", u"𑇘", u"𑇙"})},
+          {u"sind",
+           std::array<std::u16string, 10>(
+               {u"𑋰", u"𑋱", u"𑋲", u"𑋳", u"𑋴", u"𑋵", u"𑋶", u"𑋷", u"𑋸", u"𑋹"})},
+          {u"sinh",
+           std::array<std::u16string, 10>(
+               {u"෦", u"෧", u"෨", u"෩", u"෪", u"෫", u"෬", u"෭", u"෮", u"෯"})},
+          {u"sora",
+           std::array<std::u16string, 10>(
+               {u"𑃰", u"𑃱", u"𑃲", u"𑃳", u"𑃴", u"𑃵", u"𑃶", u"𑃷", u"𑃸", u"𑃹"})},
+          {u"sund",
+           std::array<std::u16string, 10>(
+               {u"᮰", u"᮱", u"᮲", u"᮳", u"᮴", u"᮵", u"᮶", u"᮷", u"᮸", u"᮹"})},
+          {u"takr",
+           std::array<std::u16string, 10>(
+               {u"𑛀", u"𑛁", u"𑛂", u"𑛃", u"𑛄", u"𑛅", u"𑛆", u"𑛇", u"𑛈", u"𑛉"})},
+          {u"talu",
+           std::array<std::u16string, 10>(
+               {u"᧐", u"᧑", u"᧒", u"᧓", u"᧔", u"᧕", u"᧖", u"᧗", u"᧘", u"᧙"})},
+          {u"tamldec",
+           std::array<std::u16string, 10>(
+               {u"௦", u"௧", u"௨", u"௩", u"௪", u"௫", u"௬", u"௭", u"௮", u"௯"})},
+          {u"tnsa",
+           std::array<std::u16string, 10>(
+               {u"\U00016AC0}",
+                u"\U00016AC1}",
+                u"\U00016AC2}",
+                u"\U00016AC3}",
+                u"\U00016AC4}",
+                u"\U00016AC5}",
+                u"\U00016AC6}",
+                u"\U00016AC7}",
+                u"\U00016AC8}",
+                u"\U00016AC9}"})},
+          {u"telu",
+           std::array<std::u16string, 10>(
+               {u"౦", u"౧", u"౨", u"౩", u"౪", u"౫", u"౬", u"౭", u"౮", u"౯"})},
+          {u"thai",
+           std::array<std::u16string, 10>(
+               {u"๐", u"๑", u"๒", u"๓", u"๔", u"๕", u"๖", u"๗", u"๘", u"๙"})},
+          {u"tibt",
+           std::array<std::u16string, 10>(
+               {u"༠", u"༡", u"༢", u"༣", u"༤", u"༥", u"༦", u"༧", u"༨", u"༩"})},
+          {u"tirh",
+           std::array<std::u16string, 10>(
+               {u"𑓐", u"𑓑", u"𑓒", u"𑓓", u"𑓔", u"𑓕", u"𑓖", u"𑓗", u"𑓘", u"𑓙"})},
+          {u"vaii",
+           std::array<std::u16string, 10>(
+               {u"꘠", u"꘡", u"꘢", u"꘣", u"꘤", u"꘥", u"꘦", u"꘧", u"꘨", u"꘩"})},
+          {u"wara",
+           std::array<std::u16string, 10>(
+               {u"𑣠", u"𑣡", u"𑣢", u"𑣣", u"𑣤", u"𑣥", u"𑣦", u"𑣧", u"𑣨", u"𑣩"})},
+          {u"wcho",
+           std::array<std::u16string, 10>(
+               {u"𞋰", u"𞋱", u"𞋲", u"𞋳", u"𞋴", u"𞋵", u"𞋶", u"𞋷", u"𞋸", u"𞋹"})},
+      };
+
+  auto entry = simpleNumeralTransliterations.find(ns);
+
+  assert(
+      entry != simpleNumeralTransliterations.end() &&
+      "getSimpleNumeralTransliteration can only be called on valid numbering systems");
+
+  return entry->second;
+}
+
+static std::u16string formatNumeric(
+    std::optional<std::u16string_view> numberingSystem,
+    std::u16string_view numericString) noexcept {
+  auto ns = numberingSystem ? *numberingSystem : u"latn";
+  auto transliteration = getSimpleNumeralTransliteration(ns);
+  std::u16string result = u"";
+  result.reserve(numericString.size());
+
+  for (auto c16 : numericString) {
+    if (c16 >= u'0' && c16 <= u'9') {
+      result += transliteration[static_cast<size_t>(c16 - u'0')];
+    } else {
+      result += c16;
+    }
+  }
+
+  return result;
+}
+} // namespace impl
 
 /// https://402.ecma-international.org/8.0/#sec-bestavailablelocale
 std::optional<std::u16string> bestAvailableLocale(
@@ -1655,6 +1981,7 @@ class CollatorApple : public Collator {
   NSLocale *nsLocale_;
   NSStringCompareOptions nsCompareOptions_;
   std::u16string locale_;
+  std::u16string dataLocale_;
   std::u16string usage_;
   std::u16string collation_;
   std::u16string caseFirst_;
@@ -1726,23 +2053,25 @@ vm::ExecutionStatus CollatorApple::initialize(
   // 11. If collation is not undefined, then
   // a. If collation does not match the Unicode Locale Identifier type
   // nonterminal, throw a RangeError exception.
-  // 12. Set opt.[[co]] to collation.
   if (auto &collationOpt = *collationRes) {
     if (!isUnicodeExtensionType(*collationOpt)) {
       return runtime.raiseRangeError(
           vm::TwineChar16("Invalid collation: ") +
           vm::TwineChar16(collationOpt->c_str()));
     }
+    // 12. Set opt.[[co]] to collation.
     opt.emplace(u"co", std::move(*collationOpt));
   }
   // 13. Let numeric be ? GetOption(options, "numeric", "boolean", undefined,
   // undefined).
   auto numericOpt = getOptionBool(runtime, options, u"numeric", {});
+  std::optional<std::u16string> numeric;
   // 14. If numeric is not undefined, then
-  // a. Let numeric be ! ToString(numeric).
-  // 15. Set opt.[[kn]] to numeric.
   if (numericOpt)
-    opt.emplace(u"kn", *numericOpt ? u"true" : u"false");
+    // a. Let numeric be ! ToString(numeric).
+    numeric = *numericOpt ? u"true" : u"false";
+  // 15. Set opt.[[kn]] to numeric.
+  opt.emplace(u"kn", numeric);
   // 16. Let caseFirst be ? GetOption(options, "caseFirst", "string", « "upper",
   // "lower", "false" », undefined).
   static constexpr std::u16string_view caseFirstOpts[] = {
@@ -1763,17 +2092,17 @@ vm::ExecutionStatus CollatorApple::initialize(
       getAvailableLocales(), *requestedLocalesRes, opt, relevantExtensionKeys);
   // 20. Set collator.[[Locale]] to r.[[locale]].
   locale_ = std::move(r.locale);
+  dataLocale_ = r.dataLocale;
   // 21. Let collation be r.[[co]].
   auto collation = r.extensions.at(u"co");
   // 22. If collation is null, let collation be "default".
+  if (!collation)
+    collation = u"default";
   // 23. Set collator.[[Collation]] to collation.
-  if (collation) {
-    collation_ = *collation;
-  }
+  collation_ = *collation;
   // 24. If relevantExtensionKeys contains "kn", then
   // a. Set collator.[[Numeric]] to ! SameValue(r.[[kn]], "true").
-  auto numeric = r.extensions.at(u"kn") == u"true";
-  numeric_ = numeric;
+  numeric_ = r.extensions.at(u"kn") == u"true";
 
   // 25. If relevantExtensionKeys contains "kf", then
   // a. Set collator.[[CaseFirst]] to r.[[kf]].
@@ -2089,7 +2418,9 @@ vm::ExecutionStatus DateTimeFormatApple::initialize(
   if (hourCycleOpt.has_value() || hour12.has_value())
     opt.emplace(u"hc", hourCycleOpt);
   // 16. Let localeData be %DateTimeFormat%.[[LocaleData]].
-  // NOTE: We use NSLocale as "localeData", see 23.
+  // NOTE: We don't actually have access to the underlying locale data, so we
+  // will use NSLocale.currentLocale instance as a substitute
+
   // 17. Let r be ResolveLocale(%DateTimeFormat%.[[AvailableLocales]],
   // requestedLocales, opt, %DateTimeFormat%.[[RelevantExtensionKeys]],
   // localeData).
@@ -2449,8 +2780,12 @@ Options DateTimeFormatApple::resolvedOptions() noexcept {
   Options options;
   options.emplace(u"locale", Option(locale_));
   options.emplace(u"timeZone", Option(timeZone_));
+  options.emplace(u"numberingSystem", Option(u"latn"s));
   if (calendar_)
     options.emplace(u"calendar", Option(*calendar_));
+  else
+    // TODO: Default to "gregorian" in initialization.
+    options.emplace(u"calendar", u"gregory");
   if (hourCycle_.has_value()) {
     options.emplace(u"hourCycle", *hourCycle_);
     options.emplace(u"hour12", hourCycle_ == u"h11" || hourCycle_ == u"h12");
@@ -2477,6 +2812,12 @@ Options DateTimeFormatApple::resolvedOptions() noexcept {
     options.emplace(u"dateStyle", *dateStyle_);
   if (timeStyle_.has_value())
     options.emplace(u"timeStyle", *timeStyle_);
+  if (dayPeriod_.has_value())
+    options.emplace(u"dayPeriod", *dayPeriod_);
+  if (fractionalSecondDigits_.has_value())
+    options.emplace(
+        u"fractionalSecondDigits",
+        static_cast<double>(*fractionalSecondDigits_));
   return options;
 }
 
@@ -2825,6 +3166,7 @@ class NumberFormatApple : public NumberFormat {
   // that caches the function returned by the format accessor (15.4.3).
   // NOTE: BoundFormat is not implemented.
   NSNumberFormatter *nsNumberFormatter_;
+  NSNumberFormatter *nsNumberFormatterFallback_;
   NSMeasurementFormatter *nsMeasurementFormatter_;
   NSUnit *nsUnit_;
 
@@ -2840,6 +3182,8 @@ class NumberFormatApple : public NumberFormat {
       uint8_t mxfdDefault,
       std::u16string_view notation) noexcept;
   void initializeNSFormatters() noexcept;
+  NSNumberFormatter *initializeNSFormatter() noexcept;
+  NSLocale *initializeNSLocale() noexcept;
 };
 
 NumberFormat::NumberFormat() = default;
@@ -2967,26 +3311,22 @@ vm::ExecutionStatus NumberFormatApple::setNumberFormatDigitOptions(
     uint8_t mnfdDefault,
     uint8_t mxfdDefault,
     std::u16string_view notation) noexcept {
-  // 1. Assert: Type(intlObj) is Object.
-  // 2. Assert: Type(options) is Object.
-  // 3. Assert: Type(mnfdDefault) is Number.
-  // 4. Assert: Type(mxfdDefault) is Number.
-  // 5. Let mnid be ? GetNumberOption(options, "minimumIntegerDigits,", 1, 21,
-  // 1).
+  // 1. Let mnid be ? GetNumberOption(options, "minimumIntegerDigits,", 1, 21,
   auto mnidRes =
       getNumberOption(runtime, options, u"minimumIntegerDigits", 1, 21, 1);
   if (LLVM_UNLIKELY(mnidRes == vm::ExecutionStatus::EXCEPTION))
     return vm::ExecutionStatus::EXCEPTION;
   auto mnidOpt = *mnidRes;
-  // 6. Let mnfd be ? Get(options, "minimumFractionDigits").
+  // 2. Let mnfd be ? Get(options, "minimumFractionDigits").
   auto mnfdIt = options.find(u"minimumFractionDigits");
-  // 7. Let mxfd be ? Get(options, "maximumFractionDigits").
+  // 3. Let mxfd be ? Get(options, "maximumFractionDigits").
   auto mxfdIt = options.find(u"maximumFractionDigits");
-  // 8. Let mnsd be ? Get(options, "minimumSignificantDigits").
+  // 4. Let mnsd be ? Get(options, "minimumSignificantDigits").
   auto mnsdIt = options.find(u"minimumSignificantDigits");
-  // 9. Let mxsd be ? Get(options, "maximumSignificantDigits").
+  // 5. Let mxsd be ? Get(options, "maximumSignificantDigits").
   auto mxsdIt = options.find(u"maximumSignificantDigits");
-  // 10. Set intlObj.[[MinimumIntegerDigits]] to mnid.
+  // 6. Set intlObj.[[MinimumIntegerDigits]] to mnid.
+  // TODO: Update the remaining initialization for ECMA-402 10
   minimumIntegerDigits_ = *mnidOpt;
   // 11. If mnsd is not undefined or mxsd is not undefined, then
   if (mnsdIt != options.end() || mxsdIt != options.end()) {
@@ -3217,6 +3557,10 @@ Options NumberFormatApple::resolvedOptions() noexcept {
   Options options;
   options.emplace(u"locale", locale_);
   options.emplace(u"style", style_);
+  if (numberingSystem_)
+    options.emplace(u"numberingSystem", *numberingSystem_);
+  else
+    options.emplace(u"numberingSystem", u"latn");
   if (currency_)
     options.emplace(u"currency", *currency_);
   if (currencyDisplay_)
@@ -3252,6 +3596,69 @@ Options NumberFormat::resolvedOptions() noexcept {
 }
 
 // https://402.ecma-international.org/8.0/#sec-formatnumber
+NSNumberFormatter *NumberFormatApple::initializeNSFormatter() noexcept {
+  // NOTE: NSNumberFormatter has following limitations:
+  // - "scientific" notation is supprted, "engineering" and "compact" are not.
+  // - roundingType is not supported.
+  // - compactDisplay is not supported.
+  // - signDisplay is not supported.
+  // - NSNumberFormatter has maximumIntegerDigits, which is 42 by default
+  auto nsNumberFormatter = [NSNumberFormatter new];
+  nsNumberFormatter.roundingMode = NSNumberFormatterRoundHalfUp;
+  if (style_ == u"decimal") {
+    nsNumberFormatter.numberStyle = NSNumberFormatterDecimalStyle;
+    if (notation_ == u"scientific") {
+      nsNumberFormatter.numberStyle = NSNumberFormatterScientificStyle;
+    }
+  } else if (style_ == u"currency") {
+    nsNumberFormatter.numberStyle = NSNumberFormatterCurrencyStyle;
+    if (currencyDisplay_ == u"code") {
+      nsNumberFormatter.numberStyle = NSNumberFormatterCurrencyISOCodeStyle;
+    } else if (currencyDisplay_ == u"symbol") {
+      nsNumberFormatter.numberStyle = NSNumberFormatterCurrencyStyle;
+    } else if (currencyDisplay_ == u"narrowSymbol") {
+      nsNumberFormatter.numberStyle = NSNumberFormatterCurrencyStyle;
+    } else if (currencyDisplay_ == u"name") {
+      nsNumberFormatter.numberStyle = NSNumberFormatterCurrencyPluralStyle;
+    }
+    if (signDisplay_ != u"never" && currencySign_ == u"accounting") {
+      nsNumberFormatter.numberStyle = NSNumberFormatterCurrencyAccountingStyle;
+    }
+  } else if (style_ == u"percent") {
+    nsNumberFormatter.numberStyle = NSNumberFormatterPercentStyle;
+  } else if (style_ == u"unit") {
+    nsNumberFormatter.numberStyle = NSNumberFormatterNoStyle;
+  }
+  nsNumberFormatter.minimumIntegerDigits = minimumIntegerDigits_;
+  if (fractionDigits_) {
+    nsNumberFormatter.minimumFractionDigits = fractionDigits_->minimum;
+    nsNumberFormatter.maximumFractionDigits = fractionDigits_->maximum;
+  }
+  if (significantDigits_) {
+    nsNumberFormatter.minimumSignificantDigits = significantDigits_->minimum;
+    nsNumberFormatter.maximumSignificantDigits = significantDigits_->maximum;
+  }
+  nsNumberFormatter.usesGroupingSeparator = useGrouping_;
+
+  return nsNumberFormatter;
+}
+
+NSLocale *NumberFormatApple::initializeNSLocale() noexcept {
+  std::u16string nsLocaleStr = dataLocale_;
+  if (style_ == u"currency") {
+    nsLocaleStr.append(u"@currency=").append(*currency_);
+  }
+
+  if (style_ == u"currency" && numberingSystem_) {
+    nsLocaleStr.append(u";numbers=").append(*numberingSystem_);
+  } else if (numberingSystem_) {
+    nsLocaleStr.append(u"@numbers=").append(*numberingSystem_);
+  }
+
+  return [NSLocale localeWithLocaleIdentifier:u16StringToNSString(nsLocaleStr)];
+}
+
+// https://402.ecma-international.org/8.0/#sec-formatnumber
 void NumberFormatApple::initializeNSFormatters() noexcept {
   // NOTE: NSNumberFormatter has following limitations:
   // - "scientific" notation is supprted, "engineering" and "compact" are not.
@@ -3259,50 +3666,15 @@ void NumberFormatApple::initializeNSFormatters() noexcept {
   // - compactDisplay is not supported.
   // - signDisplay is not supported.
   // - NSNumberFormatter has maximumIntegerDigits, which is 42 by default
-  std::u16string nsLocaleStr = dataLocale_;
-  nsNumberFormatter_ = [NSNumberFormatter new];
-  if (style_ == u"decimal") {
-    nsNumberFormatter_.numberStyle = NSNumberFormatterDecimalStyle;
-    if (notation_ == u"scientific") {
-      nsNumberFormatter_.numberStyle = NSNumberFormatterScientificStyle;
-    }
-  } else if (style_ == u"currency") {
-    nsNumberFormatter_.numberStyle = NSNumberFormatterCurrencyStyle;
-    nsLocaleStr.append(u"@currency=").append(*currency_);
-    if (currencyDisplay_ == u"code") {
-      nsNumberFormatter_.numberStyle = NSNumberFormatterCurrencyISOCodeStyle;
-    } else if (currencyDisplay_ == u"symbol") {
-      nsNumberFormatter_.numberStyle = NSNumberFormatterCurrencyStyle;
-    } else if (currencyDisplay_ == u"narrowSymbol") {
-      nsNumberFormatter_.numberStyle = NSNumberFormatterCurrencyStyle;
-    } else if (currencyDisplay_ == u"name") {
-      nsNumberFormatter_.numberStyle = NSNumberFormatterCurrencyPluralStyle;
-    }
-    if (signDisplay_ != u"never" && currencySign_ == u"accounting") {
-      nsNumberFormatter_.numberStyle = NSNumberFormatterCurrencyAccountingStyle;
-    }
-  } else if (style_ == u"percent") {
-    nsNumberFormatter_.numberStyle = NSNumberFormatterPercentStyle;
-  } else if (style_ == u"unit") {
-    nsNumberFormatter_.numberStyle = NSNumberFormatterNoStyle;
-  }
-  nsNumberFormatter_.minimumIntegerDigits = minimumIntegerDigits_;
-  if (fractionDigits_) {
-    nsNumberFormatter_.minimumFractionDigits = fractionDigits_->minimum;
-    nsNumberFormatter_.maximumFractionDigits = fractionDigits_->maximum;
-  }
-  if (significantDigits_) {
-    nsNumberFormatter_.minimumSignificantDigits = significantDigits_->minimum;
-    nsNumberFormatter_.maximumSignificantDigits = significantDigits_->maximum;
-  }
-  nsNumberFormatter_.usesGroupingSeparator = useGrouping_;
-  auto nsLocale =
-      [NSLocale localeWithLocaleIdentifier:u16StringToNSString(nsLocaleStr)];
-  nsNumberFormatter_.locale = nsLocale;
+  nsNumberFormatter_ = initializeNSFormatter();
+  nsNumberFormatter_.locale = initializeNSLocale();
+  nsNumberFormatterFallback_ = initializeNSFormatter();
+  nsNumberFormatterFallback_.locale = [NSLocale currentLocale];
+
   if (style_ == u"unit") {
     nsMeasurementFormatter_ = [NSMeasurementFormatter new];
     nsMeasurementFormatter_.numberFormatter = nsNumberFormatter_;
-    nsMeasurementFormatter_.locale = nsLocale;
+    nsMeasurementFormatter_.locale = nsNumberFormatter_.locale;
     if (unitDisplay_ == u"short") {
       nsMeasurementFormatter_.unitStyle = NSFormattingUnitStyleShort;
     } else if (unitDisplay_ == u"narrow") {
@@ -3321,8 +3693,16 @@ std::u16string NumberFormatApple::format(double number) noexcept {
     return nsStringToU16String(
         [nsMeasurementFormatter_ stringFromMeasurement:m]);
   }
-  return nsStringToU16String(
-      [nsNumberFormatter_ stringFromNumber:[NSNumber numberWithDouble:number]]);
+
+  auto *formatted =
+      [nsNumberFormatter_ stringFromNumber:[NSNumber numberWithDouble:number]];
+  if (formatted == nil) {
+    formatted = [nsNumberFormatterFallback_
+        stringFromNumber:[NSNumber numberWithDouble:number]];
+    return formatNumeric(numberingSystem_, nsStringToU16String(formatted));
+  }
+
+  return nsStringToU16String(formatted);
 }
 
 std::u16string NumberFormat::format(double number) noexcept {
