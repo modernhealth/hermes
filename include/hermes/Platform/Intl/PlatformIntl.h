@@ -23,7 +23,9 @@
 namespace hermes {
 namespace platform_intl {
 
-const vm::CallResult<std::vector<std::u16string_view>> supportedValuesOf(vm::Runtime &runtime,std::u16string key) noexcept;
+const vm::CallResult<std::vector<std::u16string_view>> supportedValuesOf(
+    vm::Runtime &runtime,
+    std::u16string key) noexcept;
 
 class Option {
  public:
@@ -151,8 +153,12 @@ class DateTimeFormat : public vm::DecoratedObject::Decoration {
   std::u16string format(double jsTimeValue) noexcept;
   std::vector<Part> formatToParts(double jsTimeValue) noexcept;
 
-  std::u16string formatRange(double jsTimeValueFrom, double jsTimeValueTo) noexcept;
-  std::vector<Part> formatRangeToParts(double jsTimeValueFrom, double jsTimeValueTo) noexcept;
+  std::u16string formatRange(
+      double jsTimeValueFrom,
+      double jsTimeValueTo) noexcept;
+  std::vector<Part> formatRangeToParts(
+      double jsTimeValueFrom,
+      double jsTimeValueTo) noexcept;
 };
 
 class NumberFormat : public vm::DecoratedObject::Decoration {

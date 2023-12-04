@@ -111,7 +111,9 @@ std::u16string DateTimeFormat::format(double jsTimeValue) noexcept {
   return std::u16string(s.begin(), s.end());
 }
 
-std::u16string DateTimeFormat::formatRange(double jsTimeValueFrom, double jsTimeValueTo) noexcept {
+std::u16string DateTimeFormat::formatRange(
+    double jsTimeValueFrom,
+    double jsTimeValueTo) noexcept {
   auto sfrom = format(jsTimeValueFrom);
   auto sto = format(jsTimeValueTo);
 
@@ -129,7 +131,9 @@ DateTimeFormat::formatToParts(double jsTimeValue) noexcept {
 }
 
 std::vector<std::unordered_map<std::u16string, std::u16string>>
-DateTimeFormat::formatRangeToParts(double jsTimeValueFrom, double jsTimeValueTo) noexcept {
+DateTimeFormat::formatRangeToParts(
+    double jsTimeValueFrom,
+    double jsTimeValueTo) noexcept {
   std::string sfrom = std::to_string(jsTimeValueFrom);
   std::unordered_map<std::u16string, std::u16string> frompart;
   frompart[u"type"] = u"integer";
@@ -148,7 +152,8 @@ DateTimeFormat::formatRangeToParts(double jsTimeValueFrom, double jsTimeValueTo)
   topart[u"value"] = {sto.begin(), sto.end()};
   topart[u"source"] = u"endRange";
 
-  return std::vector<std::unordered_map<std::u16string, std::u16string>>{frompart, separatorpart, topart};
+  return std::vector<std::unordered_map<std::u16string, std::u16string>>{
+      frompart, separatorpart, topart};
 }
 
 namespace {

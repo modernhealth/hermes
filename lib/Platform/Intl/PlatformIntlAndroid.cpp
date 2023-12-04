@@ -440,16 +440,22 @@ class JDateTimeFormat : public jni::JavaClass<JDateTimeFormat> {
     return method(self(), jsTimeValue);
   }
 
-  jni::local_ref<jstring> formatRange(double jsTimeValueFrom, double jsTimeValueTo) {
+  jni::local_ref<jstring> formatRange(
+      double jsTimeValueFrom,
+      double jsTimeValueTo) {
     static const auto method =
-        javaClassStatic()->getMethod<jni::alias_ref<jstring>(double, double)>("formatRange");
+        javaClassStatic()->getMethod<jni::alias_ref<jstring>(double, double)>(
+            "formatRange");
     return method(self(), jsTimeValueFrom, jsTimeValueTo);
   }
 
-  jni::local_ref<JPartsList> formatRangeToParts(double jsTimeValueFrom, double jsTimeValueTo) {
+  jni::local_ref<JPartsList> formatRangeToParts(
+      double jsTimeValueFrom,
+      double jsTimeValueTo) {
     static const auto method =
-        javaClassStatic()->getMethod<jni::alias_ref<JPartsList>(double, double)>(
-            "formatRangeToParts");
+        javaClassStatic()
+            ->getMethod<jni::alias_ref<JPartsList>(double, double)>(
+                "formatRangeToParts");
     return method(self(), jsTimeValueFrom, jsTimeValueTo);
   }
 };
@@ -483,12 +489,18 @@ class DateTimeFormatAndroid : public DateTimeFormat {
     return partsFromJava(jDateTimeFormat_->formatToParts(jsTimeValue));
   }
 
-  std::u16string formatRange(double jsTimeValueFrom, double jsTimeValueTo) noexcept {
-    return stringFromJava(jDateTimeFormat_->formatRange(jsTimeValueFrom, jsTimeValueTo));
+  std::u16string formatRange(
+      double jsTimeValueFrom,
+      double jsTimeValueTo) noexcept {
+    return stringFromJava(
+        jDateTimeFormat_->formatRange(jsTimeValueFrom, jsTimeValueTo));
   }
 
-  std::vector<Part> formatRangeToParts(double jsTimeValueFrom, double jsTimeValueTo) noexcept {
-    return partsFromJava(jDateTimeFormat_->formatRangeToParts(jsTimeValueFrom, jsTimeValueTo));
+  std::vector<Part> formatRangeToParts(
+      double jsTimeValueFrom,
+      double jsTimeValueTo) noexcept {
+    return partsFromJava(
+        jDateTimeFormat_->formatRangeToParts(jsTimeValueFrom, jsTimeValueTo));
   }
 
  private:
@@ -553,12 +565,18 @@ std::vector<Part> DateTimeFormat::formatToParts(double jsTimeValue) noexcept {
   return static_cast<DateTimeFormatAndroid *>(this)->formatToParts(jsTimeValue);
 }
 
-std::u16string DateTimeFormat::formatRange(double jsTimeValueFrom, double jsTimeValueTo) noexcept {
-  return static_cast<DateTimeFormatAndroid *>(this)->formatRange(jsTimeValueFrom, jsTimeValueTo);
+std::u16string DateTimeFormat::formatRange(
+    double jsTimeValueFrom,
+    double jsTimeValueTo) noexcept {
+  return static_cast<DateTimeFormatAndroid *>(this)->formatRange(
+      jsTimeValueFrom, jsTimeValueTo);
 }
 
-std::vector<Part> DateTimeFormat::formatRangeToParts(double jsTimeValueFrom, double jsTimeValueTo) noexcept {
-  return static_cast<DateTimeFormatAndroid *>(this)->formatRangeToParts(jsTimeValueFrom, jsTimeValueTo);
+std::vector<Part> DateTimeFormat::formatRangeToParts(
+    double jsTimeValueFrom,
+    double jsTimeValueTo) noexcept {
+  return static_cast<DateTimeFormatAndroid *>(this)->formatRangeToParts(
+      jsTimeValueFrom, jsTimeValueTo);
 }
 
 namespace {
