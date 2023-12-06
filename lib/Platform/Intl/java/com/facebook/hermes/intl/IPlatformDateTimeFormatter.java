@@ -7,7 +7,10 @@
 
 package com.facebook.hermes.intl;
 
+import android.os.Build;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
@@ -405,6 +408,61 @@ public interface IPlatformDateTimeFormatter {
     }
   }
 
+  enum DayPeriod {
+    NARROW,
+    SHORT,
+    LONG,
+    UNDEFINED;
+
+    @Override
+    public String toString() {
+      switch (this) {
+        case NARROW:
+          return "narrow";
+        case SHORT:
+          return "short";
+        case LONG:
+          return "long";
+        case UNDEFINED:
+          return "";
+        default:
+          throw new IllegalArgumentException();
+      }
+    }
+
+    // Day period is only supported on API 28+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    public String getSkeletonSymbol() {
+      switch (this) {
+        case NARROW:
+          return "BBBBB";
+        case SHORT:
+          return "B";
+        case LONG:
+          return "BBBB";
+        case UNDEFINED:
+          return "";
+        default:
+          throw new IllegalArgumentException();
+      }
+    }
+
+    public String getSkeletonSymbolFallback() {
+      switch (this) {
+        case NARROW:
+          return "aaaaa";
+        case SHORT:
+          return "a";
+        case LONG:
+          return "aaaa";
+        case UNDEFINED:
+          return "";
+        default:
+          throw new IllegalArgumentException();
+      }
+    }
+  }
+
   enum DateStyle {
     FULL,
     LONG,
@@ -474,7 +532,8 @@ public interface IPlatformDateTimeFormatter {
       HourCycle hourCycle,
       Object timeZone,
       DateStyle dateStyle,
-      TimeStyle timeStyle)
+      TimeStyle timeStyle,
+      DayPeriod dayPeriod)
       throws JSRangeErrorException;
 
   String format(double n) throws JSRangeErrorException;

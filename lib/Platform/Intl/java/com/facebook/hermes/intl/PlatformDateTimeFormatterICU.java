@@ -163,9 +163,16 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
     if (field == DateFormat.Field.TIME_ZONE) {
       return "timeZoneName";
     }
+
+    // Flexible day period is only supported on API 28+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && field == DateFormat.Field.FLEXIBLE_DAY_PERIOD) {
+        return "dayPeriod";
+    }
+
     if (field == DateFormat.Field.AM_PM) {
       return "dayPeriod";
     }
+
     // TODO:: There must be a better way to do this.
     if (field.toString().equals("android.icu.text.DateFormat$Field(related year)"))
       return "relatedYear";
@@ -532,7 +539,8 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
       TimeZoneName timeZoneName,
       HourCycle hourCycle,
       DateStyle dateStyle,
-      TimeStyle timeStyle)
+      TimeStyle timeStyle,
+      DayPeriod dayPeriod)
       throws JSRangeErrorException {
 
     StringBuilder skeletonBuffer = new StringBuilder();
@@ -561,6 +569,14 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
         skeletonBuffer.append(minute.getSkeletonSymbol());
         skeletonBuffer.append(second.getSkeletonSymbol());
         skeletonBuffer.append(timeZoneName.getSkeletonSymbol());
+
+        // Day period is only technically supported on API 28+,
+        // so we fallback to the AM/PM field
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+          skeletonBuffer.append(dayPeriod.getSkeletonSymbol());
+        } else {
+          skeletonBuffer.append(dayPeriod.getSkeletonSymbolFallback());
+        }
     }
 
     return skeletonBuffer.toString();
@@ -584,7 +600,8 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
       HourCycle hourCycle,
       Object timeZone,
       DateStyle dateStyle,
-      TimeStyle timeStyle)
+      TimeStyle timeStyle,
+      DayPeriod dayPeriod)
       throws JSRangeErrorException {
     String skeleton =
         getSkeleton(
@@ -600,7 +617,8 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
             timeZoneName,
             hourCycle,
             dateStyle,
-            timeStyle);
+            timeStyle,
+            dayPeriod);
 
     ILocaleObject<?> modifiedLocaleObjectWithCalendar = resolvedLocaleObject.cloneObject();
     Calendar calendarInstance = null;
