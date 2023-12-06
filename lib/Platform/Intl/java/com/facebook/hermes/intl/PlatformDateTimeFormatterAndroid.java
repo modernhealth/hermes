@@ -9,6 +9,8 @@ package com.facebook.hermes.intl;
 
 import android.os.Build;
 
+import androidx.annotation.Nullable;
+
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.text.CharacterIterator;
@@ -138,6 +140,9 @@ public class PlatformDateTimeFormatterAndroid implements IPlatformDateTimeFormat
     }
     if (field == DateFormat.Field.AM_PM) {
       return "dayPeriod";
+    }
+    if (field == DateFormat.Field.MILLISECOND) {
+      return "fractionalSecond";
     }
     // TODO:: There must be a better way to do this.
     if (field.toString().equals("java.text.DateFormat$Field(related year)"))
@@ -374,7 +379,8 @@ public class PlatformDateTimeFormatterAndroid implements IPlatformDateTimeFormat
       Object timeZone,
       DateStyle dateStyle,
       TimeStyle timeStyle,
-      DayPeriod dayPeriod)
+      DayPeriod dayPeriod,
+      @Nullable Integer fractionalSecondDigits)
       throws JSRangeErrorException {
     if (!calendar.isEmpty()) {
       ArrayList<String> calendarList = new ArrayList<>();

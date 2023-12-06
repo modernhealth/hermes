@@ -19,6 +19,7 @@ import android.icu.util.TimeZone;
 import android.icu.util.ULocale;
 import android.os.Build;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import java.text.AttributedCharacterIterator;
@@ -171,6 +172,10 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
 
     if (field == DateFormat.Field.AM_PM) {
       return "dayPeriod";
+    }
+
+    if (field == DateFormat.Field.MILLISECOND) {
+      return "fractionalSecond";
     }
 
     // TODO:: There must be a better way to do this.
@@ -540,7 +545,8 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
       HourCycle hourCycle,
       DateStyle dateStyle,
       TimeStyle timeStyle,
-      DayPeriod dayPeriod)
+      DayPeriod dayPeriod,
+      @Nullable Integer fractionalSecondDigits)
       throws JSRangeErrorException {
 
     StringBuilder skeletonBuffer = new StringBuilder();
@@ -577,6 +583,20 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
         } else {
           skeletonBuffer.append(dayPeriod.getSkeletonSymbolFallback());
         }
+
+        if (fractionalSecondDigits != null) {
+          switch (fractionalSecondDigits) {
+            case 1:
+              skeletonBuffer.append("S");
+              break;
+            case 2:
+              skeletonBuffer.append("SS");
+              break;
+            case 3:
+              skeletonBuffer.append("SSS");
+              break;
+          }
+        }
     }
 
     return skeletonBuffer.toString();
@@ -601,7 +621,8 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
       Object timeZone,
       DateStyle dateStyle,
       TimeStyle timeStyle,
-      DayPeriod dayPeriod)
+      DayPeriod dayPeriod,
+      Integer fractionalSecondDigits)
       throws JSRangeErrorException {
     String skeleton =
         getSkeleton(
@@ -618,7 +639,8 @@ public class PlatformDateTimeFormatterICU implements IPlatformDateTimeFormatter 
             hourCycle,
             dateStyle,
             timeStyle,
-            dayPeriod);
+            dayPeriod,
+            fractionalSecondDigits);
 
     ILocaleObject<?> modifiedLocaleObjectWithCalendar = resolvedLocaleObject.cloneObject();
     Calendar calendarInstance = null;
