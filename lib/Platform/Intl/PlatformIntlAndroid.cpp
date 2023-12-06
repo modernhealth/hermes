@@ -716,5 +716,11 @@ std::vector<Part> NumberFormat::formatToParts(double number) noexcept {
   return static_cast<NumberFormatAndroid *>(this)->formatToParts(number);
 }
 
+const vm::CallResult<std::vector<std::u16string_view>> supportedValuesOf(
+    vm::Runtime &runtime,
+    std::u16string key) noexcept {
+    return runtime.raiseError("Intl.supportedValuesOf is unsupported on Android");
+}
+
 } // namespace platform_intl
 } // namespace hermes
