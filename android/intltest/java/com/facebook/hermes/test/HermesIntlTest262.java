@@ -13,6 +13,7 @@ import android.content.res.AssetManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.facebook.hermes.intltest.BuildConfig;
 import com.facebook.hermes.test.JSRuntime;
 
 import java.io.BufferedReader;
@@ -22,6 +23,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,16 +32,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +59,7 @@ import org.junit.runners.Parameterized;
 public final class HermesIntlTest262 {
   private static final String LOG_TAG = "HermesIntlTest";
 
-  protected static void evalScriptFromAsset(JSRuntime rt, String filename) throws IOException {
+  protected static String loadFileContentsFromAsset(String filename) throws IOException {
     Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
     AssetManager assets = instrumentation.getContext().getAssets();
     InputStream is = assets.open(filename);
@@ -64,9 +70,46 @@ public final class HermesIntlTest262 {
       total.append(line).append('\n');
     }
 
-    String script = total.toString();
+    return total.toString();
+  }
+
+  protected static void evalScriptFromAsset(JSRuntime rt, String filename) throws IOException {
+    String script = loadFileContentsFromAsset(filename);
 
     rt.evaluateJavaScript(script);
+  }
+
+  protected static Set<String> unsupportedFeatures = new HashSet<String>(Arrays.asList(
+      "Temporal",
+      "Intl.NumberFormat-v3"
+  ));
+
+  protected List<String> getFeaturesList() {
+    // Parse a string like similar to "features: [class, class-fields-public, arrow-function]"
+    Pattern pattern = Pattern.compile("features:\\s*\\[(.*)?\\]");
+    Matcher matcher = pattern.matcher(this.contents);
+
+    if (!matcher.find()) {
+      return Collections.emptyList();
+    }
+
+    String featureList = matcher.group(1);
+    String[] features = featureList.split("[ ]*,[ ]*");
+
+    return Arrays.asList(features);
+  }
+
+  protected boolean hasUnsupportedFeatures() {
+    List<String> features = getFeaturesList();
+
+    for (String feature : features) {
+      Log.d(LOG_TAG, "Feature " + feature);
+      if (unsupportedFeatures.contains(feature)) {
+        return true;
+      }
+    }
+
+     return false;
   }
 
   protected static void evaluateCommonScriptsFromAsset(JSRuntime rt) throws IOException {
@@ -80,7 +123,7 @@ public final class HermesIntlTest262 {
     evalScriptFromAsset(rt, "test262/harness/testTypedArray.js");
   }
 
-  @Parameterized.Parameters(name = "{0}")
+  @Parameterized.Parameters(name = BuildConfig.TEST_BASE_DIR + "/{0}")
   public static Iterable<? extends Object> data() {
     try {
       return findAllTestCasesRuntime();
@@ -94,19 +137,28 @@ public final class HermesIntlTest262 {
 
   public HermesIntlTest262(String path) {
     this.path = path;
+
+  }
+
+  private String contents;
+
+  @Before
+  public void setUp() throws IOException {
+    this.contents = loadFileContentsFromAsset(this.path);
+
+    Assume.assumeTrue(!hasUnsupportedFeatures());
   }
 
   @Test
   public void test262Intl() {
     try {
-
       Log.d(LOG_TAG, "Evaluating " + path);
 
       try (JSRuntime rt = JSRuntime.makeHermesRuntime()) {
         evaluateCommonScriptsFromAsset(rt);
 
         try {
-          evalScriptFromAsset(rt, this.path);
+           rt.evaluateJavaScript(this.contents);
 
         } catch (com.facebook.jni.CppException ex) {
           Assert.fail(ex.getMessage());
@@ -115,6 +167,11 @@ public final class HermesIntlTest262 {
     } catch (IOException exc) {
       Assert.fail(exc.getMessage());
     }
+  }
+
+  @After
+  public void cleanUp() {
+    this.contents = null;
   }
 
   public static List<String> findAllTestCasesRuntime() throws IOException {
@@ -199,7 +256,8 @@ public final class HermesIntlTest262 {
             "test262/test/intl402/Collator/constructor-options-throwing-getters.js",
             "test262/test/intl402/Collator/subclassing.js",
             "test262/test/intl402/Collator/proto-from-ctor-realm.js",
-            "test262/test/intl402/Collator/prototype/resolvedOptions/order.js"));
+            "test262/test/intl402/Collator/prototype/resolvedOptions/order.js",
+            "test262/test/intl402/Collator/prototype/compare/ignorePunctuation.js"));
 
     // Intl.DateTimeFormat
     skipList.addAll(
