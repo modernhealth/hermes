@@ -719,7 +719,7 @@ std::vector<Part> NumberFormat::formatToParts(double number) noexcept {
 const vm::CallResult<std::vector<std::u16string_view>> supportedValuesOf(
     vm::Runtime &runtime,
     std::u16string key) noexcept {
-    return runtime.raiseError("Intl.supportedValuesOf is unsupported on Android");
+  return runtime.raiseError("Intl.supportedValuesOf is unsupported on Android");
 }
 
 } // namespace platform_intl
